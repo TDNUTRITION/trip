@@ -16,7 +16,7 @@ button{width:100%;font-size:16px;padding:12px;border-radius:10px;border:0;backgr
 <button id="go">Open</button><div id="err" role="alert"></div></form>
 <script>
 (async()=>{
-const SALT='3ZTXlUCefYW3xjvcJ707pg==',ITER=600000;
+const SALT='JnGtYljKTBeYIyQAvGDoWw==',ITER=600000;
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),tob64=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
 async function open(raw){const k=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);const b=new Uint8Array(await (await fetch('site.bin',{cache:'no-cache'})).arrayBuffer());const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(0,12)},k,b.slice(12));const html=new TextDecoder().decode(p);document.open();document.write(html);document.close()}
 let saved=null;try{saved=sessionStorage.getItem('tk')||localStorage.getItem('tk')}catch(e){}
