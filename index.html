@@ -16,14 +16,14 @@ button{width:100%;font-size:16px;padding:12px;border-radius:10px;border:0;backgr
 <button id="go">Open</button><div id="err" role="alert"></div></form>
 <script>
 (async()=>{
-const SALT='JtO7o4NeVF1oWGGSR4i+6Q==',ITER=600000;
+const ITER=600000;let BIN=null;const bin=async()=>BIN||(BIN=new Uint8Array(await (await fetch('site.bin?v='+Date.now(),{cache:'no-store'})).arrayBuffer()));
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),tob64=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
-async function open(raw){const k=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);const b=new Uint8Array(await (await fetch('site.bin',{cache:'no-cache'})).arrayBuffer());const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(0,12)},k,b.slice(12));const html=new TextDecoder().decode(p);document.open();document.write(html);document.close()}
+async function open(raw){const k=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);const b=(await bin()).slice(16);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(0,12)},k,b.slice(12));const html=new TextDecoder().decode(p);document.open();document.write(html);document.close()}
 let saved=null;try{saved=sessionStorage.getItem('tk')||localStorage.getItem('tk')}catch(e){}
-if(saved){try{await open(b64(saved));return}catch(e){try{localStorage.removeItem('tk');sessionStorage.removeItem('tk')}catch(_){}}}
+if(saved){try{await open(b64(saved));return}catch(e){BIN=null;try{localStorage.removeItem('tk');sessionStorage.removeItem('tk')}catch(_){}}}
 document.getElementById('f').addEventListener('submit',async e=>{e.preventDefault();const btn=document.getElementById('go'),err=document.getElementById('err');btn.textContent='Opening…';err.textContent='';
 try{const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(document.getElementById('pw').value.trim()),'PBKDF2',false,['deriveBits']);
-const raw=await crypto.subtle.deriveBits({name:'PBKDF2',salt:b64(SALT),iterations:ITER,hash:'SHA-256'},base,256);
+const raw=await crypto.subtle.deriveBits({name:'PBKDF2',salt:(await bin()).slice(0,16),iterations:ITER,hash:'SHA-256'},base,256);
 const s=tob64(raw);try{sessionStorage.setItem('tk',s);if(document.getElementById('rem').checked)localStorage.setItem('tk',s)}catch(_){}
 await open(raw)}catch(x){try{sessionStorage.removeItem('tk');localStorage.removeItem('tk')}catch(_){}btn.textContent='Open';err.textContent='That password did not work.'}});
 })();
